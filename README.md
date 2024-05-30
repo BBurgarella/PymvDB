@@ -1,5 +1,5 @@
 # PymvDB
-
+![Logo](./logo.webp)
 ## Description
 PymvDB is a Python library designed to create and manage a vector database for images.
 it comes with the ability to use Hugging Face image feature extraction models as encoders.
