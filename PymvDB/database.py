@@ -5,7 +5,7 @@ import base64
 from PIL import Image
 import io
 
-class VectorDatabase:
+class PymvDB:
     """
     A class to manage a vector database for image embeddings.
 

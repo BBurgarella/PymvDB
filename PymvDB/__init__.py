@@ -1,5 +1,5 @@
 # __init__.py
 from .embeddings import HuggingFaceEmbedding
-from .database import VectorDatabase
+from .database import PymvDB
 
-__all__ = ["HuggingFaceEmbedding", "VectorDatabase"]
+__all__ = ["HuggingFaceEmbedding", "PymvDB"]
