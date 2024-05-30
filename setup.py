@@ -16,4 +16,5 @@ setup(
     description="A simple vector database for images",
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url="https://github.com/BBurgarella/PymvDB")
+    url="https://github.com/BBurgarella/PymvDB"
+)
