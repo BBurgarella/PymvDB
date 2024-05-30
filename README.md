@@ -14,6 +14,13 @@ You can install PymvDB using pip (coming soon):
 pip install pymvdb
 ```
 
+while waiting for me to publish it on pip, you can download and install PymvDB using:
+```sh
+git clone https://github.com/BBurgarella/PymvDB.git
+cd PymvDB
+pip install .
+```
+
 ## Usage
 TBD
 
