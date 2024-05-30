@@ -1,4 +1,3 @@
-# database.py
 import sqlite3
 import numpy as np
 import base64
@@ -37,10 +36,12 @@ class PymvDB:
         CREATE TABLE IF NOT EXISTS vectors (
             id INTEGER PRIMARY KEY,
             image_base64 TEXT NOT NULL,
+            image_file_name TEXT NOT NULL UNIQUE,
             vector BLOB NOT NULL
         )
         ''')
         self.conn.commit()
+
 
     def insert_image(self, image_path: str):
         """
@@ -51,10 +52,10 @@ class PymvDB:
         """
         image = Image.open(image_path)
         image_base64 = self.image_file_to_base64(image_path)
-        vector = self.embedding_model.get_embedding(image)
-        self.insert_image_vector(image_base64, vector)
+        vector = self.embedding_model(image)
+        self.insert_image_vector(image_path, image_base64, vector)
 
-    def insert_image_vector(self, image_base64: str, vector: np.ndarray):
+    def insert_image_vector(self, path: str, image_base64: str, vector: np.ndarray):
         """
         Inserts an image's base64 encoding and embedding vector into the database.
 
@@ -64,26 +65,31 @@ class PymvDB:
         """
         cursor = self.conn.cursor()
         vector_blob = np.array(vector).tobytes()
-        cursor.execute('''
-        INSERT INTO vectors (image_base64, vector) VALUES (?, ?)
-        ''', (image_base64, vector_blob))
-        self.conn.commit()
+        try:
+            cursor.execute('''
+            INSERT INTO vectors (image_base64, image_file_name, vector) VALUES (?, ?, ?)
+            ''', (image_base64, path, vector_blob))
+            self.conn.commit()
+        except sqlite3.IntegrityError as e:
+            print(f"An image with the file name '{path}' already exists in the database.")
+
 
     def get_all_vectors(self):
         """
         Retrieves all image vectors from the database.
 
         Returns:
-            tuple: A tuple containing a list of image base64 strings and a list of vectors.
+            tuple: A tuple containing lists of image base64 strings, image file names, and vectors.
         """
         cursor = self.conn.cursor()
         cursor.execute('''
-        SELECT image_base64, vector FROM vectors
+        SELECT image_base64, image_file_name, vector FROM vectors
         ''')
         rows = cursor.fetchall()
-        images = [row[0] for row in rows]
-        vectors = [np.frombuffer(row[1], dtype=np.float32) for row in rows]
-        return images, vectors
+        files = [row[0] for row in rows]
+        paths = [row[1] for row in rows]
+        vectors = [np.frombuffer(row[2], dtype=np.float32) for row in rows]
+        return files, paths, vectors
 
     def calculate_cosine_similarity(self, vector1: np.ndarray, vector2: np.ndarray) -> float:
         """
@@ -124,20 +130,21 @@ class PymvDB:
         image_data = base64.b64decode(base64_string)
         return Image.open(io.BytesIO(image_data))
 
-    def find_similar_images(self, target_vector: np.ndarray, top_N=5, threshold=0.0):
+    def find_similar_images(self, target_image, top_N=5, threshold=0.0):
         """
         Finds the most similar images to a target vector.
 
         Args:
-            target_vector (numpy.ndarray): The target embedding vector.
+            target_image: The target image to find similarities.
             top_N (int): The number of similar images to return.
             threshold (float): The similarity threshold.
 
         Returns:
-            list: A list of tuples containing the image base64 string and similarity score.
+            list: A list of tuples containing the image file name, base64 string, and similarity score.
         """
-        images, vectors = self.get_all_vectors()
+        target_vector = self.embedding_model(target_image)
+        base64s, paths, vectors = self.get_all_vectors()
         similarities = [self.calculate_cosine_similarity(target_vector, vec) for vec in vectors]
-        similar_images = [(images[i], similarities[i]) for i in range(len(images)) if similarities[i] >= threshold]
-        similar_images.sort(key=lambda x: x[1], reverse=True)
+        similar_images = [(paths[i], base64s[i], similarities[i]) for i in range(len(vectors)) if similarities[i] >= threshold]
+        similar_images.sort(key=lambda x: x[2], reverse=True)
         return similar_images[:top_N]

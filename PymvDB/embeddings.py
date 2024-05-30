@@ -22,7 +22,7 @@ class HuggingFaceEmbedding:
         self.processor = AutoImageProcessor.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name)
     
-    def get_embedding(self, image: Image.Image) -> np.ndarray:
+    def __call__(self, image: Image.Image) -> np.ndarray:
         """
         Generates an embedding for the given image.
 
