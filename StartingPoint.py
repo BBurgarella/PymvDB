@@ -1,11 +1,14 @@
-from PymvDB import PymvDB, HuggingFaceEmbedding
+import PymvDB
 from PIL import Image
 import time
 import os
 import sys
 
-Emb = HuggingFaceEmbedding()
-Db = PymvDB(Emb,db_path="./db.db3")
+Emb = PymvDB.HuggingFaceEmbedding()
+Db = PymvDB.Client(Emb,persistent_path="./db.db3")
+Db.reset()
+collection = Db.create_collection(Name="Example_Collection")
+
 
 # Directory containing the images
 image_directory = "example_images"
@@ -16,7 +19,7 @@ for filename in os.listdir(image_directory):
     file_path = os.path.join(image_directory, filename)
     
     # Insert the image into the database
-    Db.insert_image(file_path)
+    collection.add_image(file_path)
 
 if __name__ == '__main__':
     image_path = sys.argv[1]
@@ -24,11 +27,9 @@ if __name__ == '__main__':
 
 
     t0 = time.time()
-    Res = Db.find_similar_images(New_image)
+    Res = collection.find_similar_images(New_image, top_N=2, threshold=0.1)
     t1 = time.time()
 
-    #Cat = Res[0][0]
-    #Dog = Res[1][0]
+    print(Res)
 
-    print(f"This image looks like a {Res[0][0].split("/")[1][:-4]}, with a score of {Res[0][2]}")
-    print(f"The second best is a {Res[1][0].split("/")[1][:-4]}, with a score of {Res[1][2]}")
+    print(f"This image looks like a {Res.files[0].split("/")[1][:-4]}, with a score of {Res.scores[0]}")

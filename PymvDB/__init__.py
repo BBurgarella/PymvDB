@@ -4,15 +4,16 @@ This module initializes the package and imports the necessary components.
 The following components are imported:
 - HuggingFaceEmbedding: Handles embedding operations using HuggingFace's transformers.
 - PymvDB: Manages database interactions.
+- Client: Manages the vector database and collection creation.
+- Collection: Handles operations within individual collections.
 
 The __all__ variable is defined to specify the public API of the package, 
-including HuggingFaceEmbedding and PymvDB.
+including HuggingFaceEmbedding, PymvDB, Client, and Collection.
 """
 
-
-# __init__.py
 from .embeddings import HuggingFaceEmbedding
-from .database import PymvDB
+from .Client import Client
+from .Collection import Collection
 
-__all__ = ["HuggingFaceEmbedding", "PymvDB"]
-__version__= "0.1.0"
+__all__ = ["HuggingFaceEmbedding", "Client", "Collection"]
+__version__ = "0.1.0"

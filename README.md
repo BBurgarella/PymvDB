@@ -22,5 +22,25 @@ pip install .
 ```
 
 ## Usage
-TBD
+```python
+# Initialize the client with an embedding model
+embedding_model = YourEmbeddingModel()  # Replace with your actual embedding model
+db = Client(embedding_model, persistent_path='database.sqlite')
 
+# Create a new collection
+collection = db.create_collection(Name='my_collection')
+
+# Add an image to the collection
+collection.add_image('path/to/image')
+
+# Find similar images
+target_image = Image.open('path/to/target_image')
+similar_images = collection.find_similar_images(target_image, top_N=5)
+print(similar_images)
+```
+
+You can run a quick example by using the StartingPoint file. All the images used here come from Wikipedia
+
+```sh
+python StartingPoint.py Test_car.jpg
+```
