@@ -1,6 +1,23 @@
 import sqlite3
 from PIL import Image
-from .Collection import Collection
+from .Collection import Collection, HTTPCollection
+import requests
+from typing import Optional
+
+class HTTPclient:
+    def __init__(self, server_url):
+        self.server_url = server_url
+
+    def create_collection(self, Name):
+        url = f"{self.server_url}/create_collection"
+        response = requests.post(url, json={"name": Name})
+        
+        if response.status_code == 200 and response.json().get("message") == f"Collection '{Name}' created.":
+            return HTTPCollection(Name, self.server_url)
+        else:
+            raise Exception(f"Failed to create collection: {response.json()}")
+
+   
 
 class Client:
     """
@@ -10,19 +27,19 @@ class Client:
     ----------
     embedding_model : callable
         The model used to generate embeddings from images.
-    conn : sqlite3.Connection
-        The SQLite connection object.
+    conn_str : str
+        The SQLite connection string (path to the SQLite database file).
 
     Methods
     -------
-    create_collection(Name)
+    create_collection(name)
         Creates a new collection.
     reset_collection(collection)
         Resets the specified collection.
     reset()
         Resets all collections managed by the client.
     """
-    def __init__(self, embedding_model, persistent_path=None):
+    def __init__(self, embedding_model: callable, persistent_path: Optional[str] = None):
         """
         Parameters
         ----------
@@ -33,17 +50,21 @@ class Client:
         """
         self.embedding_model = embedding_model
         if persistent_path is None:
-            self.conn = sqlite3.connect(':memory:')
+            self.conn_str = ':memory:'
         else:
-            self.conn = sqlite3.connect(persistent_path)
+            self.conn_str = persistent_path
 
-    def create_collection(self, Name: str):
+    def _get_connection(self):
+        """Returns a new SQLite connection."""
+        return sqlite3.connect(self.conn_str)
+
+    def create_collection(self, name: str):
         """
         Creates a new collection.
 
         Parameters
         ----------
-        Name : str
+        name : str
             The name of the new collection.
 
         Returns
@@ -51,7 +72,7 @@ class Client:
         Collection
             A new Collection object.
         """
-        return Collection(Name, self.conn, self.embedding_model)
+        return Collection(name, self.conn_str, self.embedding_model)
 
     def reset_collection(self, collection: Collection):
         """
@@ -62,21 +83,25 @@ class Client:
         collection : Collection
             The collection to reset.
         """
-        cursor = self.conn.cursor()
-        cursor.execute(f'''
-        DROP TABLE IF EXISTS {collection.name}
-        ''')
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'''
+            DROP TABLE IF EXISTS {collection.name}
+            ''')
+            conn.commit()
         collection._create_table()
 
     def reset(self):
         """
         Resets all collections managed by the client.
         """
-        cursor = self.conn.cursor()
-        # Fetch all table names
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        tables = cursor.fetchall()
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            # Fetch all table names
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            tables = cursor.fetchall()
 
-        # Drop each table
-        for table in tables:
-            cursor.execute(f"DROP TABLE IF EXISTS {table[0]};")
+            # Drop each table
+            for table in tables:
+                cursor.execute(f"DROP TABLE IF EXISTS {table[0]};")
+            conn.commit()

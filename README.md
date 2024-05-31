@@ -24,7 +24,7 @@ cd PymvDB
 pip install .
 ```
 
-## Usage
+## Local Usage
 ```python
 # Initialize the client with an embedding model
 embedding_model = YourEmbeddingModel()  # Replace with your actual embedding model

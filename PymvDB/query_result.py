@@ -37,7 +37,7 @@ class qresult:
         metadata : list of dict
             The metadata associated with the matching images.
         """
-        self.n = n_findings
+        self.n = int(n_findings)
         self.scores = scores
         self.files = files
         self.base64 = base64

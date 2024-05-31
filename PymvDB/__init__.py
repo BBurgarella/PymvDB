@@ -12,8 +12,9 @@ including HuggingFaceEmbedding, PymvDB, Client, and Collection.
 """
 
 from .embeddings import HuggingFaceEmbedding
-from .Client import Client
+from .Client import Client, HTTPclient
 from .Collection import Collection
+from .server import HTTPserver
 
-__all__ = ["HuggingFaceEmbedding", "Client", "Collection"]
+__all__ = ["HuggingFaceEmbedding", "Client", "Collection", "HTTPclient", "HTTPserver"]
 __version__ = "0.1.0"
