@@ -2,6 +2,7 @@
 <p align="center">
 <img src="https://github.com/BBurgarella/PymvDB/raw/main/Logo.webp" alt="logo" width="400"/>
 </p>
+
 ## Description
 PymvDB is a Python library designed to create and manage a vector database for images.
 it comes with the ability to use Hugging Face image feature extraction models as encoders.
@@ -33,7 +34,7 @@ db = Client(embedding_model, persistent_path='database.sqlite')
 collection = db.create_collection(Name='my_collection')
 
 # Add an image to the collection
-collection.add_image('path/to/image')
+collection.add_image('path/to/image', metadata={"..."})
 
 # Find similar images
 target_image = Image.open('path/to/target_image')

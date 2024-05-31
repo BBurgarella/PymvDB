@@ -19,7 +19,7 @@ for filename in os.listdir(image_directory):
     file_path = os.path.join(image_directory, filename)
     
     # Insert the image into the database
-    collection.add_image(file_path)
+    collection.add_image(file_path, metadata={"extension": file_path[-4:]})
 
 if __name__ == '__main__':
     image_path = sys.argv[1]
@@ -27,7 +27,11 @@ if __name__ == '__main__':
 
 
     t0 = time.time()
-    Res = collection.find_similar_images(New_image, top_N=2, threshold=0.1)
+    Res = collection.find_similar_images(New_image, 
+                                         top_N=2, 
+                                         threshold=0.1
+                                         # where={"metadata_field": "is_equal_to_this"}, # optional filter
+                                         )
     t1 = time.time()
 
     print(Res)

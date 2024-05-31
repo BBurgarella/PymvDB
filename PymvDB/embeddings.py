@@ -8,16 +8,28 @@ class HuggingFaceEmbedding:
     """
     A class to generate image embeddings using a Hugging Face model.
 
-    Attributes:
-        processor (AutoImageProcessor): Processor for image preprocessing.
-        model (AutoModel): Model to generate image embeddings.
+    Attributes
+    ----------
+    processor : AutoImageProcessor
+        Processor for image preprocessing.
+    model : AutoModel
+        Model to generate image embeddings.
+
+    Methods
+    -------
+    __call__(image)
+        Generates an embedding for the given image.
+    similarity(vector1, vector2)
+        Calculates the cosine similarity between two vectors.
     """
     def __init__(self, model_name='google/vit-base-patch16-224-in21k'):
         """
         Initializes the HuggingFaceEmbedding with the specified model.
 
-        Args:
-            model_name (str): The name of the Hugging Face model to use.
+        Parameters
+        ----------
+        model_name : str, optional
+            The name of the Hugging Face model to use (default is 'google/vit-base-patch16-224-in21k').
         """
         self.processor = AutoImageProcessor.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name)
@@ -26,11 +38,15 @@ class HuggingFaceEmbedding:
         """
         Generates an embedding for the given image.
 
-        Args:
-            image (PIL.Image.Image): The image to generate an embedding for.
+        Parameters
+        ----------
+        image : PIL.Image.Image
+            The image to generate an embedding for.
 
-        Returns:
-            numpy.ndarray: The embedding vector.
+        Returns
+        -------
+        numpy.ndarray
+            The embedding vector.
         """
         inputs = self.processor(images=image, return_tensors="pt")
         outputs = self.model(**inputs)
@@ -43,11 +59,16 @@ class HuggingFaceEmbedding:
         """
         Calculates the cosine similarity between two vectors.
 
-        Args:
-            vector1 (numpy.ndarray): The first vector.
-            vector2 (numpy.ndarray): The second vector.
+        Parameters
+        ----------
+        vector1 : numpy.ndarray
+            The first vector.
+        vector2 : numpy.ndarray
+            The second vector.
 
-        Returns:
-            float: The cosine similarity between the vectors.
+        Returns
+        -------
+        float
+            The cosine similarity between the vectors.
         """
         return np.dot(vector1, vector2) / (norm(vector1) * norm(vector2))
